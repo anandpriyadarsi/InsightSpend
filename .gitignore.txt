@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+
+backup/*.zip
+reports/*.pdf
+exports/*.csv
+
+*.log
+
+.vscode/
+.idea/
+
+Thumbs.db
+.DS_Store
+
+.env
