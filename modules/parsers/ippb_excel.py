@@ -1,6 +1,6 @@
 from openpyxl import load_workbook
 from pathlib import Path
-
+from modules.categorizer import apply_categories
 
 def safe_float(value):
     """
@@ -178,7 +178,15 @@ def print_transactions(transactions):
         print(f"Amount      : {symbol}₹{amount:.2f}")
         print(f"Type        : {transaction_type.title()}")
         print(f"Category    : {transaction['category']}")
+        if "category_confidence" in transaction:
+            print(
+            f"Confidence  : {transaction['category_confidence']}"
+            )
 
+        if "category_reason" in transaction:
+            print(
+                f"Reason      : {transaction['category_reason']}"
+                )
         if transaction["balance"] is not None:
             print(
                 f"Balance     : ₹{transaction['balance']:.2f}"
@@ -208,6 +216,9 @@ if __name__ == "__main__":
 
         transactions = parse_ippb_excel(
             statement_path
+        )
+        transactions = apply_categories(
+            transactions
         )
 
         print_transactions(
