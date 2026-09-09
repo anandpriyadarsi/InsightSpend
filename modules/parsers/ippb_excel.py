@@ -1,7 +1,13 @@
 from openpyxl import load_workbook
 from pathlib import Path
 from modules.categorizer import apply_categories
-
+from modules.import_review import review_transactions
+from modules.duplicate_detector import (
+    filter_duplicates,
+    print_duplicate_summary
+)
+from modules.statement_import import save_imported_transactions
+from modules.duplicate_detector import register_imported_transactions
 def safe_float(value):
     """
     Convert an Excel cell value into float.
@@ -205,7 +211,6 @@ def print_transactions(transactions):
 
     print("=" * 70)
 
-
 if __name__ == "__main__":
 
     statement_path = input(
@@ -213,17 +218,54 @@ if __name__ == "__main__":
     ).strip().strip('"')
 
     try:
-
         transactions = parse_ippb_excel(
             statement_path
         )
+
         transactions = apply_categories(
             transactions
         )
 
-        print_transactions(
+        approved_transactions = review_transactions(
             transactions
         )
+
+        new_transactions, duplicate_transactions = (
+            filter_duplicates(
+                approved_transactions
+            )
+        )
+
+        print_duplicate_summary(
+            new_transactions,
+            duplicate_transactions
+        )
+
+        print("\nApproved transactions ready for import:")
+
+        for transaction in new_transactions:
+            print(
+                transaction["date"],
+                transaction["type"],
+                transaction["category"],
+                transaction["amount"]
+            )
+       
+        saved_transactions = save_imported_transactions(
+            new_transactions
+        )
+
+        if saved_transactions:
+            registered_count = register_imported_transactions(
+                saved_transactions
+            )
+
+            print(
+                f"\nRegistered {registered_count} "
+                f"transactions in import history."
+            )
+        else:
+            print("\nNo transactions were saved.")
 
     except FileNotFoundError as error:
         print(f"\nError: {error}")
