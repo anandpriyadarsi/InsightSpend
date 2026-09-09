@@ -17,3 +17,8 @@ Thumbs.db
 data/user.json
 .venv/
 venv/
+# Private financial/runtime data
+data/income.json
+data/expenses.json
+data/import_history.json
+data/category_rules.json
